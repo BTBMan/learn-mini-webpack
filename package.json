@@ -1,0 +1,27 @@
+{
+  "name": "learn-mini-webpack",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "微小型打包器pack实现",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BTBMan/learn-mini-webpack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BTBMan/learn-mini-webpack/issues"
+  },
+  "homepage": "https://github.com/BTBMan/learn-mini-webpack#readme",
+  "dependencies": {
+    "@babel/parser": "^7.17.3"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21"
+  }
+}
