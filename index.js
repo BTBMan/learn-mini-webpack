@@ -1,10 +1,11 @@
 import fs from 'fs';
+import path from 'path';
 import parser from '@babel/parser';
 import traverse from '@babel/traverse';
 
-function createAsset() {
+function createAsset(filePath) {
   // 1. 读取入口文件
-  const source = fs.readFileSync('./example/main.js', {
+  const source = fs.readFileSync(filePath, {
     encoding: 'utf-8',
   });
 
@@ -27,11 +28,34 @@ function createAsset() {
   });
 
   return {
+    filePath,
     source,
     deps,
   };
 }
 
-const { source, deps } = createAsset();
+// 创建依赖关系的图
+function createGraph() {
+  const mainAsset = createAsset('./example/main.js');
 
-console.log(source, deps);
+  // 队列 广度优先搜索
+  const queue = [mainAsset];
+
+  // 这里使用 forof 循环 如果使用 forEach 的话则只会循环一次 不会像 forof 一样随着数组的长度增加而增加循环
+  for (const asset of queue) {
+    // 去遍历每个asset对应的依赖
+    const { deps } = asset;
+
+    deps.forEach((filePath) => {
+      const depAsset = createAsset(path.resolve('./example', filePath));
+
+      queue.push(depAsset);
+    });
+  }
+
+  return queue;
+}
+
+const graph = createGraph();
+
+console.log(graph);
