@@ -26,8 +26,6 @@
 })({
   // 首先要创建一个对应的函数映射
   './main.js': function (require, module, exports) {
-    // import { foo } from './foo.js';
-    // import { bar } from './bar.js';
     const { foo } = require('./foo.js');
     const { bar } = require('./bar.js');
 
@@ -37,14 +35,8 @@
     console.log('main');
   },
   './foo.js': function (require, module, exports) {
-    // import bar from './bar.js';
     const { bar } = require('./bar.js');
 
-    // export function foo() {
-    //   console.log('foo');
-
-    //   bar();
-    // }
     module.exports = {
       foo() {
         console.log('foo');
@@ -54,10 +46,6 @@
     };
   },
   './bar.js': function (require, module, exports) {
-    // export function bar() {
-    //   console.log('bar');
-    // }
-
     module.exports = {
       bar() {
         console.log('bar');
