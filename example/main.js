@@ -4,4 +4,4 @@ import { bar } from './bar.js';
 foo();
 bar();
 
-console.log('foo');
+console.log('main');
