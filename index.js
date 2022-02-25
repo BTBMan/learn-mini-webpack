@@ -14,15 +14,24 @@ function createAsset() {
     sourceType: 'module',
   });
 
-  traverse.default(ast, {
-    enter(path) {
-      console.log(path);
+  // 保存依赖关系
+  const deps = [];
 
-      if (path.isIdentifier({ name: 'n' })) {
-        path.node.name = 'x';
-      }
+  traverse.default(ast, {
+    ImportDeclaration({ node }) {
+      const { value } = node.source;
+
+      // 拿到当前文件中的 import 依赖对应的路径
+      deps.push(value);
     },
   });
+
+  return {
+    source,
+    deps,
+  };
 }
 
-createAsset();
+const { source, deps } = createAsset();
+
+console.log(source, deps);
