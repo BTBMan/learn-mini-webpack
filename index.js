@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import ejs from 'ejs';
 import parser from '@babel/parser';
 import traverse from '@babel/traverse';
+import bc from 'babel-core';
 
+// 创建资源
 function createAsset(filePath) {
   // 1. 读取入口文件
   const source = fs.readFileSync(filePath, {
@@ -58,4 +61,13 @@ function createGraph() {
 
 const graph = createGraph();
 
-console.log(graph);
+// 构建代码
+function build(graph) {
+  const template = fs.readFileSync('./bundle.ejs', { encoding: 'utf-8' });
+  const code = ejs.render(template);
+
+  // 把处理过的代码转为 js 文件
+  fs.writeFileSync('./dist/bundle.js', code, { encoding: 'utf-8' });
+}
+
+build(graph);

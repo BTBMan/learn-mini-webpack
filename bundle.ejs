@@ -1,0 +1,7 @@
+(function (modules) { require('./main.js'); function require(filePath) { const module = { exports:
+{}, }; modules[filePath](require, module, module.exports); return module.exports; } })({
+'./main.js': function (require, module, exports) { const { foo } = require('./foo.js'); const { bar
+} = require('./bar.js'); foo(); bar(); console.log('main'); }, './foo.js': function (require,
+module, exports) { const { bar } = require('./bar.js'); module.exports = { foo() {
+console.log('foo'); bar(); }, }; }, './bar.js': function (require, module, exports) { module.exports
+= { bar() { console.log('bar'); }, }; }, });
