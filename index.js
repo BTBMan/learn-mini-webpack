@@ -1,9 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import ejs from 'ejs';
-import parser from '@babel/parser';
-import traverse from '@babel/traverse';
-import bc from 'babel-core';
+import { parse, traverse, transformFromAst } from '@babel/core';
 
 // 创建资源
 function createAsset(filePath) {
@@ -14,14 +12,20 @@ function createAsset(filePath) {
 
   // 2.获取依赖的关系
   // 首先通过文件内容解析为 ast
-  const ast = parser.parse(source, {
+  const ast = parse(source, {
     sourceType: 'module',
+  });
+
+  // 转换代码里的内容
+  // 首先要把 esm 的格式转换为 cjs 的格式 此时须要设置预设为 env
+  const { code } = transformFromAst(ast, null, {
+    presets: ['env'],
   });
 
   // 保存依赖关系
   const deps = [];
 
-  traverse.default(ast, {
+  traverse(ast, {
     ImportDeclaration({ node }) {
       const { value } = node.source;
 
@@ -32,7 +36,7 @@ function createAsset(filePath) {
 
   return {
     filePath,
-    source,
+    code,
     deps,
   };
 }

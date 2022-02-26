@@ -19,11 +19,11 @@
   },
   "homepage": "https://github.com/BTBMan/learn-mini-webpack#readme",
   "dependencies": {
-    "@babel/parser": "^7.17.3",
+    "@babel/core": "^7.17.5",
+    "babel-preset-env": "^1.7.0",
     "ejs": "^3.1.6"
   },
   "devDependencies": {
-    "@babel/traverse": "^7.17.3",
     "@types/node": "^17.0.21"
   }
 }
