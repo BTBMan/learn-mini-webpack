@@ -68,7 +68,18 @@ const graph = createGraph();
 // 构建代码
 function build(graph) {
   const template = fs.readFileSync('./bundle.ejs', { encoding: 'utf-8' });
-  const code = ejs.render(template);
+
+  // 处理传递给 ejs 模板里的关系映射数据
+  const data = graph.map(({ filePath, code }) => {
+    return {
+      filePath,
+      code,
+    };
+  });
+
+  const code = ejs.render(template, {
+    data,
+  });
 
   // 把处理过的代码转为 js 文件
   fs.writeFileSync('./dist/bundle.js', code, { encoding: 'utf-8' });
