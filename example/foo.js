@@ -1,4 +1,4 @@
-import bar from './bar.js';
+import { bar } from './bar.js';
 
 export function foo() {
   console.log('foo');

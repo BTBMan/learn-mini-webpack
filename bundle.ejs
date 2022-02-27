@@ -1,4 +1,5 @@
-(function (modules) { require('./main.js'); function require(filePath) { const module = { exports:
-{}, }; modules[filePath](require, module, module.exports); return module.exports; } })({ <%
-data.forEach(info => { %> '<%- info.filePath %>': function (require, module, exports) { <%-
-info.code %> }, <% }); %> });
+(function (modules) { require(0); function require(id) { const [fn, mapping] = modules[id]; const
+module = { exports: {}, }; function localRequire(filePath) { const moduleId = mapping[filePath];
+return require(moduleId); } fn(localRequire, module, module.exports); return module.exports; } })({
+<% data.forEach(info => { %> '<%- info.id %>': [function (require, module, exports) { <%- info.code
+%> }, <%- JSON.stringify(info.mapping) %> ], <% }); %> });

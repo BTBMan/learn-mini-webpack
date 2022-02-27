@@ -3,6 +3,9 @@ import path from 'path';
 import ejs from 'ejs';
 import { parse, traverse, transformFromAst } from '@babel/core';
 
+// 用来标记依赖的标识 id
+let id = 0;
+
 // 创建资源
 function createAsset(filePath) {
   // 1. 读取入口文件
@@ -38,6 +41,8 @@ function createAsset(filePath) {
     filePath,
     code,
     deps,
+    id: id++, // 每次创建一个 asset 资源的时候 就把 id 自增1
+    mapping: {}, // 用来存储对应的依赖关系
   };
 }
 
@@ -56,6 +61,9 @@ function createGraph() {
     deps.forEach((filePath) => {
       const depAsset = createAsset(path.resolve('./example', filePath));
 
+      // 处理传递给 ejs 模板里的关系映射数据
+      asset.mapping[filePath] = depAsset.id;
+
       queue.push(depAsset);
     });
   }
@@ -63,17 +71,16 @@ function createGraph() {
   return queue;
 }
 
-const graph = createGraph();
-
 // 构建代码
 function build(graph) {
   const template = fs.readFileSync('./bundle.ejs', { encoding: 'utf-8' });
 
-  // 处理传递给 ejs 模板里的关系映射数据
-  const data = graph.map(({ filePath, code }) => {
+  const data = graph.map(({ id, filePath, code, mapping }) => {
     return {
       filePath,
+      id,
       code,
+      mapping,
     };
   });
 
@@ -84,5 +91,7 @@ function build(graph) {
   // 把处理过的代码转为 js 文件
   fs.writeFileSync('./dist/bundle.js', code, { encoding: 'utf-8' });
 }
+
+const graph = createGraph();
 
 build(graph);
