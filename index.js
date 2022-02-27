@@ -2,6 +2,28 @@ import fs from 'fs';
 import path from 'path';
 import ejs from 'ejs';
 import { parse, traverse, transformFromAst } from '@babel/core';
+import { jsonLoader } from './jsonLoader.js';
+
+// 假定的 webpack 的配置
+const webpackConfig = {
+  modules: {
+    rules: [
+      {
+        test: /\.json$/,
+        // 有两种配置 loader use 的方式
+        use: jsonLoader,
+        // use: [
+        //   {
+        //     loader: jsonLoader,
+        //     options: {
+        //       //
+        //     },
+        //   },
+        // ],
+      },
+    ],
+  },
+};
 
 // 用来标记依赖的标识 id
 let id = 0;
@@ -9,8 +31,21 @@ let id = 0;
 // 创建资源
 function createAsset(filePath) {
   // 1. 读取入口文件
-  const source = fs.readFileSync(filePath, {
+  let source = fs.readFileSync(filePath, {
     encoding: 'utf-8',
+  });
+
+  // 在这里实现 loader 的处理
+  const { rules = [] } = webpackConfig.modules || {};
+
+  // 遍历 rules 判断当前的 filePath 是否与 test 定义的正则匹配
+  rules.forEach(({ test, use }) => {
+    const matched = test.test(filePath);
+
+    if (matched) {
+      // 匹配的话 进行处理
+      source = use.call(null, source);
+    }
   });
 
   // 2.获取依赖的关系
