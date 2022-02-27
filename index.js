@@ -11,15 +11,15 @@ const webpackConfig = {
       {
         test: /\.json$/,
         // 有两种配置 loader use 的方式
-        use: jsonLoader,
-        // use: [
-        //   {
-        //     loader: jsonLoader,
-        //     options: {
-        //       //
-        //     },
-        //   },
-        // ],
+        // use: jsonLoader,
+        use: [
+          {
+            loader: jsonLoader,
+            options: {
+              //
+            },
+          },
+        ],
       },
     ],
   },
@@ -36,15 +36,29 @@ function createAsset(filePath) {
   });
 
   // 在这里实现 loader 的处理
+  const loaderContext = {
+    // 这里是给 loader 方法传入的上下文 方便调用 webpack 给的方法
+    addDep: (dep) => {
+      console.log(dep);
+    },
+  };
   const { rules = [] } = webpackConfig.modules || {};
 
   // 遍历 rules 判断当前的 filePath 是否与 test 定义的正则匹配
   rules.forEach(({ test, use }) => {
     const matched = test.test(filePath);
 
+    // 匹配的话 进行处理
     if (matched) {
-      // 匹配的话 进行处理
-      source = use.call(null, source);
+      // 处理 use 是数组的情况
+      if (Array.isArray(use)) {
+        // 这里须要把数组进行反转 因为在 webpack 的设计里面 是从后往前执行的 loader 的
+        use.reverse().forEach(({ loader }) => {
+          source = loader.call(loaderContext, source);
+        });
+      } else {
+        source = use.call(loaderContext, source);
+      }
     }
   });
 
