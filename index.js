@@ -1,8 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import ejs from 'ejs';
-import { parse, traverse, transformFromAst } from '@babel/core';
+import babelCore from '@babel/core';
+import { SyncHook } from 'tapable';
 import { jsonLoader } from './jsonLoader.js';
+import { HelloPlugin } from './HelloPlugin.js';
+
+const { parse, traverse, transformFromAst } = babelCore;
 
 // 假定的 webpack 的配置
 const webpackConfig = {
@@ -23,6 +27,7 @@ const webpackConfig = {
       },
     ],
   },
+  plugins: [new HelloPlugin()],
 };
 
 // 用来标记依赖的标识 id
@@ -35,14 +40,16 @@ function createAsset(filePath) {
     encoding: 'utf-8',
   });
 
-  // 在这里实现 loader 的处理
+  const { modules, plugins } = webpackConfig;
+
+  // 在这里实现 loader 的处理 ----------------------------------------
   const loaderContext = {
     // 这里是给 loader 方法传入的上下文 方便调用 webpack 给的方法
     addDep: (dep) => {
       console.log(dep);
     },
   };
-  const { rules = [] } = webpackConfig.modules || {};
+  const { rules = [] } = modules || {};
 
   // 遍历 rules 判断当前的 filePath 是否与 test 定义的正则匹配
   rules.forEach(({ test, use }) => {
@@ -62,11 +69,30 @@ function createAsset(filePath) {
     }
   });
 
+  // plugin 的实现 --------------------------------------------
+  const complier = {
+    // 里面实例化了须要的钩子 以便在后续的某个过程中调用
+    hooks: {
+      beginParseAst: new SyncHook(['text']),
+      parseAstDone: new SyncHook(['ast']),
+    },
+  };
+
+  // 这里调用 插件的示例的 apply() 方法
+  (plugins || []).forEach((plugin) => {
+    plugin.apply(complier);
+  });
+
+  // 这里调用钩子 在 plugin 里面注册的钩子会被执行
+  complier.hooks.beginParseAst.call('hello');
+
   // 2.获取依赖的关系
   // 首先通过文件内容解析为 ast
   const ast = parse(source, {
     sourceType: 'module',
   });
+
+  complier.hooks.parseAstDone.call(ast);
 
   // 转换代码里的内容
   // 首先要把 esm 的格式转换为 cjs 的格式 此时须要设置预设为 env
